@@ -1,0 +1,23 @@
+@import url("../../index.css");
+
+.drag-div {
+  width: 90%;
+  aspect-ratio: 1/1;
+  border-radius: 100%;
+  border: 2px dashed var(--color-disabled);
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.dragging {
+  background-color: rgb(196, 196, 196);
+  transform: scale(0.96);
+  transition: 0.3s ease;
+}
+
+@media (width>500px) {
+  .drag-div {
+    width: 350px;
+  }
+}

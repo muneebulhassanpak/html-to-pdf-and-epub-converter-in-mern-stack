@@ -1,0 +1,26 @@
+/* .app {
+  display: grid;
+  place-items: center;
+} */
+
+.centering-div {
+  display: grid;
+  min-height: 90vh;
+  place-items: center;
+}
+
+.dragging-section {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  margin: 2rem auto;
+  width: 300px;
+}
+
+@media (width>768px) {
+  .dragging-section {
+    flex-direction: row;
+    justify-content: space-evenly;
+    width: 700px;
+  }
+}

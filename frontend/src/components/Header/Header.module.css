@@ -1,0 +1,9 @@
+@import url("../../index.css");
+
+.header {
+  padding: 1rem;
+  text-align: center;
+  background-color: var(--color-darkBlue);
+  color: white;
+  width: 100%;
+}

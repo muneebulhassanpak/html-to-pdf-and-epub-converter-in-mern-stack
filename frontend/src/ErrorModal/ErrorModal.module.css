@@ -1,0 +1,11 @@
+.error-background {
+  max-width: 768px;
+  margin: 1rem auto;
+  background-color: rgb(243, 103, 103);
+  color: white;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+.text-center {
+  text-align: center;
+}
