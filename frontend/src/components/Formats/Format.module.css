@@ -35,7 +35,7 @@
 .green {
   background-color: var(--color-success);
   color: white;
-  /* cursor: not-allowed; */
+  cursor: not-allowed;
 }
 
 .convert-btn__disabled {

@@ -55,8 +55,8 @@ exports.pdfConversionController = async (req, res, next) => {
           }
           res.send(combinedPdfBuffer);
 
-          // Optionally, you can delete the original HTML file here if needed.
-          // fs.unlinkSync(newFileName);
+          // Delete the original HTML file here if needed.
+          fs.unlinkSync(newFileName);
         });
     });
   } catch (err) {
