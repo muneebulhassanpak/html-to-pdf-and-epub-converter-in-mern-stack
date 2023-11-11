@@ -57,7 +57,7 @@ const DraggableArea = () => {
   const handleFileUpload = (selectedFile) => {
     let progress = 0;
     const interval = setInterval(() => {
-      progress += 5;
+      progress += 10;
       if (progress >= 100) {
         clearInterval(interval);
       }
@@ -66,7 +66,6 @@ const DraggableArea = () => {
 
     setTimeout(() => {
       setUploadProgress(0);
-      alert("File uploaded successfully.");
       Context.uploadFile(selectedFile);
     }, 4000);
   };
