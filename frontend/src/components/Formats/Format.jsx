@@ -49,9 +49,13 @@ const Format = () => {
         Context.file = null;
         document.body.removeChild(a);
         Context.uploadFile(null, false);
+        Context.changeNotificationStatus("success", "Successful conversion");
       }
     } catch (error) {
-      Context.changeErrorStatus("Something went wrong converting file");
+      Context.changeNotificationStatus(
+        "error",
+        "Something went wrong converting file"
+      );
       setConverting(false);
     }
   };

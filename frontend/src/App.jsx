@@ -5,11 +5,11 @@ import DraggableArea from "./components/DraggingDiv/DraggableArea";
 import Format from "./components/Formats/Format";
 import Header from "./components/Header/Header";
 import AppContext from "./store/app-context";
-import ErrorModal from "./ErrorModal/ErrorModal";
+import ErrorModal from "./NotificationModal/NotificationModal";
 
 const App = () => {
   const [isFileUploaded, setIsFileUploaded] = useState(false);
-  const [error, setError] = useState(null);
+  const [notification, setNotification] = useState(null);
   const [file, setFile] = useState(null);
 
   const fileUploadFunction = (file, status) => {
@@ -17,24 +17,25 @@ const App = () => {
     setIsFileUploaded(status);
   };
 
-  const errorMessage = (message) => {
-    setError(message);
-    // Automatically clear the error after 3 seconds
+  const notificationMessage = (type, message) => {
+    setNotification({ type, message });
     setTimeout(() => {
-      setError(null);
+      setNotification(null);
     }, 3000);
   };
 
   return (
     <main className={styles["app"]}>
       <Header />
-      {error && <ErrorModal>{error}</ErrorModal>}
+      {notification && (
+        <ErrorModal type={notification.type}>{notification.message}</ErrorModal>
+      )}
 
       <AppContext.Provider
         value={{
           isFileUploaded,
-          isThereAnyError: error,
-          changeErrorStatus: errorMessage,
+          isThereAnyError: notification,
+          changeNotificationStatus: notificationMessage,
           uploadFile: fileUploadFunction,
           file,
         }}
