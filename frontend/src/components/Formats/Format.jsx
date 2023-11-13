@@ -23,24 +23,36 @@ const Format = () => {
         method: "POST",
         body: submittedData,
       });
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      if (format === "EPUB") {
-        a.download = "convertedFile.epub";
+
+      const contentType = response.headers.get("Content-Type");
+
+      if (contentType && contentType.includes("application/json")) {
+        const data = await response.json();
+        console.log(data);
+        throw new Error();
       } else {
-        a.download = "generated.pdf";
+        // File attachment response
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        if (format === "EPUB") {
+          a.download = "convertedFile.epub";
+        } else {
+          a.download = "generated.pdf";
+        }
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        setConverting(false);
+        Context.isFileUploaded = false;
+        Context.file = null;
+        document.body.removeChild(a);
+        Context.uploadFile(null, false);
       }
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      setConverting(false);
-      Context.isFileUploaded = false;
-      Context.file = null;
-      document.body.removeChild(a);
     } catch (error) {
-      console.error("Error generating PDF:", error);
+      Context.changeErrorStatus("Something went wrong converting file");
+      setConverting(false);
     }
   };
 
@@ -59,59 +71,61 @@ const Format = () => {
   };
 
   return (
-    <div className={styles["format-div"]}>
-      <div className={styles["format-div__child"]}>
-        <h3>Choose the template</h3>
-        <select className={styles["formats"]} ref={templateRef}>
-          {supportedDesigns.map((item) => (
-            <option
-              key={item.id}
-              value={item.title}
-              className={styles["format-field"]}
+    <>
+      <div className={styles["format-div"]}>
+        <div className={styles["format-div__child"]}>
+          <h3>Choose the template</h3>
+          <select className={styles["formats"]} ref={templateRef}>
+            {supportedDesigns.map((item) => (
+              <option
+                key={item.id}
+                value={item.title}
+                className={styles["format-field"]}
+              >
+                {item.title}
+              </option>
+            ))}
+          </select>
+        </div>
+        <br />
+        <div className={styles["format-div__child"]}>
+          <h3>Choose the output format</h3>
+          <select className={styles["formats"]} ref={formatRef}>
+            {supportedFromats.map((item) => (
+              <option
+                key={item.id}
+                value={item.title}
+                className={styles["format-field"]}
+              >
+                {item.title}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          {converting ? (
+            <button
+              disabled
+              className={`${styles["converting"]}  ${styles["green"]} `}
             >
-              {item.title}
-            </option>
-          ))}
-        </select>
-      </div>
-      <br />
-      <div className={styles["format-div__child"]}>
-        <h3>Choose the output format</h3>
-        <select className={styles["formats"]} ref={formatRef}>
-          {supportedFromats.map((item) => (
-            <option
-              key={item.id}
-              value={item.title}
-              className={styles["format-field"]}
+              CONVERTING .....
+            </button>
+          ) : (
+            <button
+              disabled={!Context.isFileUploaded}
+              className={
+                Context.isFileUploaded
+                  ? styles["convert-btn"]
+                  : `${styles["convert-btn"]} ${styles["convert-btn__disabled"]}`
+              }
+              onClick={dataCollector}
             >
-              {item.title}
-            </option>
-          ))}
-        </select>
+              Convert
+            </button>
+          )}
+        </div>
       </div>
-      <div>
-        {converting ? (
-          <button
-            disabled
-            className={`${styles["converting"]}  ${styles["green"]} `}
-          >
-            CONVERTING .....
-          </button>
-        ) : (
-          <button
-            // disabled={!Context.isFileUploaded}
-            className={
-              Context.isFileUploaded
-                ? styles["convert-btn"]
-                : `${styles["convert-btn"]} ${styles["convert-btn__disabled"]}`
-            }
-            onClick={dataCollector}
-          >
-            Convert
-          </button>
-        )}
-      </div>
-    </div>
+    </>
   );
 };
 

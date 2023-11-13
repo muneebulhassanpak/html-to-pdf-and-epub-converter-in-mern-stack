@@ -12,9 +12,9 @@ const App = () => {
   const [error, setError] = useState(null);
   const [file, setFile] = useState(null);
 
-  const fileUploadFunction = (file) => {
+  const fileUploadFunction = (file, status) => {
     setFile(file);
-    setIsFileUploaded(true);
+    setIsFileUploaded(status);
   };
 
   const errorMessage = (message) => {

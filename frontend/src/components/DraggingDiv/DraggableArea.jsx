@@ -66,7 +66,7 @@ const DraggableArea = () => {
 
     setTimeout(() => {
       setUploadProgress(0);
-      Context.uploadFile(selectedFile);
+      Context.uploadFile(selectedFile, true);
     }, 4000);
   };
 

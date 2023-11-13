@@ -41,7 +41,7 @@
 .convert-btn__disabled {
   background-color: var(--color-disabled);
   color: black;
-  /* cursor: not-allowed; */
+  cursor: not-allowed;
 }
 
 @media (width>550px) {
