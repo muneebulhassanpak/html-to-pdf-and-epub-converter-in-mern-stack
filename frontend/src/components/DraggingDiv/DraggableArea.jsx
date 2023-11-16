@@ -18,7 +18,7 @@ const isValidFile = (selectedFile) => {
   return true;
 };
 
-const DraggableArea = () => {
+const DraggableArea = (props) => {
   // Context logic
   const Context = useContext(AppContext);
 
@@ -88,8 +88,8 @@ const DraggableArea = () => {
       onDrop={handleDrop}
       className={
         drag
-          ? `${styles["drag-div"]} ${styles["dragging"]}`
-          : styles["drag-div"]
+          ? `${styles["drag-div"]} ${styles["dragging"]} ${props.className}`
+          : `${props.className} ${styles["drag-div"]}`
       }
     >
       <input

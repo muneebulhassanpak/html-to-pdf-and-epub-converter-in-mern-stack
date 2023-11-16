@@ -8,7 +8,7 @@ import {
 } from "../../helpers/URLConstruction";
 import { supportedFromats, supportedDesigns } from "../../helpers/utils";
 
-const Format = () => {
+const Format = (props) => {
   const Context = useContext(AppContext);
   const [converting, setConverting] = useState(false);
   const formatRef = useRef();
@@ -75,8 +75,8 @@ const Format = () => {
   };
 
   return (
-    <>
-      <div className={styles["format-div"]}>
+    <div className={styles["format-wrapper"]}>
+      <div className={`${props.className} ${styles["format-div"]}`}>
         <div className={styles["format-div__child"]}>
           <h3>Choose the template</h3>
           <select className={styles["formats"]} ref={templateRef}>
@@ -90,8 +90,8 @@ const Format = () => {
               </option>
             ))}
           </select>
+          <div className={styles["format-preview-div"]}></div>
         </div>
-        <br />
         <div className={styles["format-div__child"]}>
           <h3>Choose the output format</h3>
           <select className={styles["formats"]} ref={formatRef}>
@@ -106,30 +106,30 @@ const Format = () => {
             ))}
           </select>
         </div>
-        <div>
-          {converting ? (
-            <button
-              disabled
-              className={`${styles["converting"]}  ${styles["green"]} `}
-            >
-              CONVERTING .....
-            </button>
-          ) : (
-            <button
-              disabled={!Context.isFileUploaded}
-              className={
-                Context.isFileUploaded
-                  ? styles["convert-btn"]
-                  : `${styles["convert-btn"]} ${styles["convert-btn__disabled"]}`
-              }
-              onClick={dataCollector}
-            >
-              Convert
-            </button>
-          )}
-        </div>
       </div>
-    </>
+      <div className={styles["convert-button-div"]}>
+        {converting ? (
+          <button
+            disabled
+            className={`${styles["converting"]}  ${styles["green"]} `}
+          >
+            CONVERTING .....
+          </button>
+        ) : (
+          <button
+            disabled={!Context.isFileUploaded}
+            className={
+              Context.isFileUploaded
+                ? styles["convert-btn"]
+                : `${styles["convert-btn"]} ${styles["convert-btn__disabled"]}`
+            }
+            onClick={dataCollector}
+          >
+            Convert
+          </button>
+        )}
+      </div>
+    </div>
   );
 };
 

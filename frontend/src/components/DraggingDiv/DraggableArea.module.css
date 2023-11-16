@@ -1,7 +1,7 @@
 @import url("../../index.css");
 
 .drag-div {
-  width: 90%;
+  width: 80%;
   aspect-ratio: 1/1;
   border-radius: 100%;
   border: 2px dashed var(--color-disabled);
@@ -17,8 +17,9 @@
   transition: 0.3s ease;
 }
 
-@media (width>500px) {
+@media (width>768px) {
   .drag-div {
-    width: 350px;
+    max-width: 500px;
+    width: 100%;
   }
 }

@@ -11,16 +11,36 @@
   margin: 1rem 0rem;
   width: 100%;
   padding: 0 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-content: center;
+  flex-direction: column-reverse;
+  gap: 1rem;
 }
 
+.format-div > .format-div__child {
+  flex: 1;
+}
 .format-div__child > h3 {
+  text-align: center;
+}
+
+.format-preview-div {
+  width: 200px;
+  height: 200px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  margin: 1rem auto auto;
+}
+
+.convert-button-div {
   text-align: center;
 }
 
 .convert-btn,
 .converting {
-  width: 100%;
+  width: 90%;
   height: 45px;
+  margin: 0 auto;
   background-color: var(--color-darkBlue);
   margin: 1.5rem 0rem;
   border: none;
@@ -43,13 +63,39 @@
   color: black;
   cursor: not-allowed;
 }
+.format-wrapper {
+  width: 100%;
+}
+.formats {
+  width: 100%;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+}
+.format-field {
+  width: 80%;
+}
+@media (width>768px) {
+  .format-div__child > h3 {
+    text-align: left;
+    font-size: 1rem;
+  }
+  .convert-btn,
+  .converting {
+    /* margin: 0.5rem 0; */
+  }
+}
 
-@media (width>550px) {
+@media (width>1024px) {
   .format-div {
     margin: 1rem 0rem;
-    width: auto;
+    flex-direction: row;
   }
   .format-div__child > h3 {
     text-align: left;
+    font-size: 1rem;
+  }
+  .convert-btn,
+  .converting {
+    /* margin: 0.5rem 0; */
   }
 }

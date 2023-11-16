@@ -42,8 +42,8 @@ const App = () => {
       >
         <section className={styles["centering-div"]}>
           <div className={styles["dragging-section"]}>
-            <DraggableArea />
-            <Format />
+            <DraggableArea className="draggable-div" />
+            <Format className="format-div" />
           </div>
         </section>
       </AppContext.Provider>

@@ -4,6 +4,7 @@ export const supportedFromats = [
 ];
 
 export const supportedDesigns = [
-  { id: "1", title: "Classic" },
-  { id: "2", title: "Modern" },
+  { id: "1", title: "None" },
+  { id: "2", title: "Classic" },
+  { id: "3", title: "Modern" },
 ];
