@@ -133,3 +133,18 @@ function customizeEPUBHtmlStyles(html, template) {
 
   return modifiedHtml;
 }
+
+///////////PREVIEW GENERATION PART
+exports.pdfPreviewController = async (req, res, next) => {
+  return res.json({
+    success: true,
+    message: "pdf preview created",
+  });
+};
+
+exports.epubPreviewController = async (req, res, next) => {
+  return res.json({
+    success: true,
+    message: "epub preview created",
+  });
+};

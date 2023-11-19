@@ -27,6 +27,10 @@ h3 {
   text-transform: capitalize;
 }
 
+.center {
+  text-align: center;
+}
+
 @media (width>768px) {
   h1 {
     font-size: 2rem;

@@ -1,18 +1,21 @@
-import React, { useRef, useContext, useState } from "react";
+import React, { useContext, useState } from "react";
 
 import styles from "./Format.module.css";
 import AppContext from "../../store/app-context";
 import {
   pdfConversionURL,
   epubConversionURL,
+  epubPreviewURL,
+  pdfPreviewURL,
 } from "../../helpers/URLConstruction";
 import { supportedFromats, supportedDesigns } from "../../helpers/utils";
 
 const Format = (props) => {
   const Context = useContext(AppContext);
   const [converting, setConverting] = useState(false);
-  const formatRef = useRef();
-  const templateRef = useRef();
+  const [format, setFormat] = useState("PDF");
+  const [template, setTemplate] = useState("None");
+  const [previewProgress, setPreviewProgress] = useState(false);
 
   //Data sender
   const sendData = async (submittedData, format) => {
@@ -61,12 +64,10 @@ const Format = (props) => {
   };
 
   const dataCollector = async () => {
-    if (!Context.file) {
+    if (!Context.file && template == "None") {
       Context.changeErrorStatus("Please upload File");
       return;
     }
-    const format = formatRef.current.value;
-    const template = templateRef.current.value;
     const data = new FormData();
     data.append("format", format);
     data.append("template", template);
@@ -74,12 +75,27 @@ const Format = (props) => {
     await sendData(data, format);
   };
 
+  const handlePreviewGeneration = () => {
+    setPreviewProgress(true);
+    const data = new FormData();
+    data.append("format", format);
+    data.append("template", template);
+    data.append("file", Context.file);
+    console.log(data);
+    setTimeout(() => {
+      setPreviewProgress(false);
+    }, 5000);
+  };
+
   return (
     <div className={styles["format-wrapper"]}>
       <div className={`${props.className} ${styles["format-div"]}`}>
         <div className={styles["format-div__child"]}>
           <h3>Choose the template</h3>
-          <select className={styles["formats"]} ref={templateRef}>
+          <select
+            className={styles["formats"]}
+            onChange={(e) => setTemplate(e.target.value)}
+          >
             {supportedDesigns.map((item) => (
               <option
                 key={item.id}
@@ -90,11 +106,18 @@ const Format = (props) => {
               </option>
             ))}
           </select>
-          <div className={styles["format-preview-div"]}></div>
+          {previewProgress && (
+            <div className={styles["format-preview-div"]}>
+              <p>Creating.....</p>
+            </div>
+          )}
         </div>
         <div className={styles["format-div__child"]}>
           <h3>Choose the output format</h3>
-          <select className={styles["formats"]} ref={formatRef}>
+          <select
+            className={styles["formats"]}
+            onChange={(e) => setFormat(e.target.value)}
+          >
             {supportedFromats.map((item) => (
               <option
                 key={item.id}
@@ -107,6 +130,16 @@ const Format = (props) => {
           </select>
         </div>
       </div>
+      {Context.file && template != "None" && (
+        <div className="center">
+          <button
+            className={styles["preview-button"]}
+            onClick={handlePreviewGeneration}
+          >
+            Load preview
+          </button>
+        </div>
+      )}
       <div className={styles["convert-button-div"]}>
         {converting ? (
           <button
