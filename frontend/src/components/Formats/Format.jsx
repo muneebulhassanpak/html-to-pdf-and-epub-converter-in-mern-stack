@@ -17,6 +17,7 @@ const Format = (props) => {
   const [format, setFormat] = useState("PDF");
   const [template, setTemplate] = useState("None");
   const [previewProgress, setPreviewProgress] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   //Data sender
   const sendData = async (submittedData, format) => {
@@ -100,14 +101,9 @@ const Format = (props) => {
       } else {
         // File attachment response
         const blob = await response.blob();
-        const htmlContent = await blob.text();
+        const url = window.URL.createObjectURL(blob);
 
-        // Render HTML content in the Modal component
-        ReactDOM.createPortal(
-          <Modal htmlContent={htmlContent} />,
-          document.getElementById("modal-root")
-        );
-
+        setPreviewUrl(url);
         setPreviewProgress(false);
         Context.isFileUploaded = false;
         Context.file = null;
@@ -123,81 +119,98 @@ const Format = (props) => {
     }
   };
   return (
-    <div className={styles["format-wrapper"]}>
-      <div className={`${props.className} ${styles["format-div"]}`}>
-        <div className={styles["format-div__child"]}>
-          <h3>Choose the template</h3>
-          <select
-            className={styles["formats"]}
-            onChange={(e) => setTemplate(e.target.value)}
-          >
-            {supportedDesigns.map((item) => (
-              <option
-                key={item.id}
-                value={item.title}
-                className={styles["format-field"]}
+    <>
+      <div className={styles["format-wrapper"]}>
+        <div className={`${props.className} ${styles["format-div"]}`}>
+          <div className={styles["format-div__child"]}>
+            <h3>Choose the template</h3>
+            <select
+              className={styles["formats"]}
+              onChange={(e) => setTemplate(e.target.value)}
+            >
+              {supportedDesigns.map((item) => (
+                <option
+                  key={item.id}
+                  value={item.title}
+                  className={styles["format-field"]}
+                >
+                  {item.title}
+                </option>
+              ))}
+            </select>
+            {previewProgress && (
+              <div className={styles["format-preview-div"]}>
+                <p>Creating.....</p>
+              </div>
+            )}
+          </div>
+          <div className={styles["format-div__child"]}>
+            <h3>Choose the output format</h3>
+            <select
+              className={styles["formats"]}
+              onChange={(e) => setFormat(e.target.value)}
+            >
+              {supportedFromats.map((item) => (
+                <option
+                  key={item.id}
+                  value={item.title}
+                  className={styles["format-field"]}
+                >
+                  {item.title}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        {Context.file && template !== "None" && (
+          <div className="center">
+            <button
+              className={styles["preview-button"]}
+              onClick={handlePreviewGeneration}
+            >
+              Load preview
+            </button>
+          </div>
+        )}
+        {previewUrl && (
+          <div className="center">
+            <button>
+              <a
+                className={styles["preview-button-link"]}
+                href={previewUrl}
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                {item.title}
-              </option>
-            ))}
-          </select>
-          {previewProgress && (
-            <div className={styles["format-preview-div"]}>
-              <p>Creating.....</p>
-            </div>
+                {" "}
+                Open Preview in New Tab
+              </a>
+            </button>
+          </div>
+        )}
+        <div className={styles["convert-button-div"]}>
+          {converting ? (
+            <button
+              disabled
+              className={`${styles["converting"]}  ${styles["green"]} `}
+            >
+              CONVERTING .....
+            </button>
+          ) : (
+            <button
+              disabled={!Context.isFileUploaded}
+              className={
+                Context.isFileUploaded
+                  ? styles["convert-btn"]
+                  : `${styles["convert-btn"]} ${styles["convert-btn__disabled"]}`
+              }
+              onClick={dataCollector}
+            >
+              Convert
+            </button>
           )}
         </div>
-        <div className={styles["format-div__child"]}>
-          <h3>Choose the output format</h3>
-          <select
-            className={styles["formats"]}
-            onChange={(e) => setFormat(e.target.value)}
-          >
-            {supportedFromats.map((item) => (
-              <option
-                key={item.id}
-                value={item.title}
-                className={styles["format-field"]}
-              >
-                {item.title}
-              </option>
-            ))}
-          </select>
-        </div>
       </div>
-      {Context.file && template != "None" && (
-        <div className="center">
-          <button
-            className={styles["preview-button"]}
-            onClick={handlePreviewGeneration}
-          >
-            Load preview
-          </button>
-        </div>
-      )}
-      <div className={styles["convert-button-div"]}>
-        {converting ? (
-          <button
-            disabled
-            className={`${styles["converting"]}  ${styles["green"]} `}
-          >
-            CONVERTING .....
-          </button>
-        ) : (
-          <button
-            disabled={!Context.isFileUploaded}
-            className={
-              Context.isFileUploaded
-                ? styles["convert-btn"]
-                : `${styles["convert-btn"]} ${styles["convert-btn__disabled"]}`
-            }
-            onClick={dataCollector}
-          >
-            Convert
-          </button>
-        )}
-      </div>
-    </div>
+    </>
   );
 };
 
