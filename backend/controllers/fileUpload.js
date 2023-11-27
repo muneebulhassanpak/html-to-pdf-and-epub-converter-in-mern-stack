@@ -135,11 +135,54 @@ function customizeEPUBHtmlStyles(html, template) {
 }
 
 ///////////PREVIEW GENERATION PART
+
 exports.pdfPreviewController = async (req, res, next) => {
-  return res.json({
-    success: true,
-    message: "pdf preview created",
-  });
+  try {
+    const { originalname } = req.file;
+    const fileExtension = originalname.split(".")[1];
+    const newFileName = req.file.path + "." + fileExtension;
+    fs.renameSync(req.file.path, newFileName);
+
+    // Load the uploaded HTML file for conversion
+    const html = fs.readFileSync(newFileName, "utf-8");
+
+    // Extract all headings (h1 to h6) and generate an index
+    const { modifiedHtml } = generateIndexHtml(html);
+
+    // Modify the HTML to change the font family and styles based on the template value
+    const finalHtml = customizeHtmlStyles(modifiedHtml, req.body.template);
+
+    // Options for the html-pdf package
+    const pdfOptions = {
+      format: "A4", // Set the page size to A4
+      orientation: "portrait", // or "landscape"
+    };
+
+    // Convert HTML to PDF using html-pdf
+    pdf.create(finalHtml, pdfOptions).toBuffer((err, pdfBuffer) => {
+      if (err) {
+        return next(err);
+      }
+
+      // Send only the first page as a response with headers
+      const firstPageHtml = finalHtml.replace(
+        "<body>",
+        `<body style="page-break-before: always;">`
+      );
+
+      res.setHeader("Content-Type", "text/html");
+      res.setHeader(
+        "Content-Disposition",
+        `inline; filename=${originalname}_preview.html`
+      );
+      res.send(firstPageHtml);
+
+      // Delete the original HTML file here if needed.
+      fs.unlinkSync(newFileName);
+    });
+  } catch (err) {
+    return next(err);
+  }
 };
 
 exports.epubPreviewController = async (req, res, next) => {

@@ -100,11 +100,12 @@ const Format = (props) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        if (format === "EPUB") {
-          a.download = "convertedFile.epub";
-        } else {
-          a.download = "generated.pdf";
-        }
+        // if (format === "EPUB") {
+        //   a.download = "preview.epub";
+        // } else {
+        //   a.download = "generated.pdf";
+        // }
+        a.download = "preview.html";
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
