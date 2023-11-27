@@ -9,7 +9,6 @@ import {
   pdfPreviewURL,
 } from "../../helpers/URLConstruction";
 import { supportedFromats, supportedDesigns } from "../../helpers/utils";
-import Modal from "../Modal/Modal";
 
 const Format = (props) => {
   const Context = useContext(AppContext);
