@@ -78,7 +78,8 @@
 }
 
 .preview-button,
-.preview-button-link {
+.preview-button-link,
+.generating-button {
   background-color: rgb(6, 177, 63);
   padding: 0.6rem 1.2rem;
   border-radius: 0.3rem;
@@ -86,6 +87,10 @@
   margin-top: 0.3rem;
   cursor: pointer;
   font-size: 1rem;
+}
+
+.generating-button {
+  background-color: slateblue;
 }
 
 .preview-button-link {

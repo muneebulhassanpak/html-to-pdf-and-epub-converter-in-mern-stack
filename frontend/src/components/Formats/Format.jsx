@@ -104,9 +104,6 @@ const Format = (props) => {
 
         setPreviewUrl(url);
         setPreviewProgress(false);
-        Context.isFileUploaded = false;
-        Context.file = null;
-        Context.uploadFile(null, false);
         Context.changeNotificationStatus("success", "Successful conversion");
       }
     } catch (error) {
@@ -137,11 +134,6 @@ const Format = (props) => {
                 </option>
               ))}
             </select>
-            {previewProgress && (
-              <div className={styles["format-preview-div"]}>
-                <p>Creating.....</p>
-              </div>
-            )}
           </div>
           <div className={styles["format-div__child"]}>
             <h3>Choose the output format</h3>
@@ -161,13 +153,23 @@ const Format = (props) => {
             </select>
           </div>
         </div>
-        {Context.file && template !== "None" && (
+        {Context.file &&
+          template !== "None" &&
+          !previewProgress &&
+          !previewUrl && (
+            <div className="center">
+              <button
+                className={styles["preview-button"]}
+                onClick={handlePreviewGeneration}
+              >
+                Load preview
+              </button>
+            </div>
+          )}
+        {previewProgress && (
           <div className="center">
-            <button
-              className={styles["preview-button"]}
-              onClick={handlePreviewGeneration}
-            >
-              Load preview
+            <button className={styles["generating-button"]}>
+              Generating....
             </button>
           </div>
         )}
@@ -180,7 +182,6 @@ const Format = (props) => {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {" "}
                 Open Preview in New Tab
               </a>
             </button>
@@ -196,9 +197,9 @@ const Format = (props) => {
             </button>
           ) : (
             <button
-              disabled={!Context.isFileUploaded}
+              disabled={!Context.isFileUploaded || previewProgress}
               className={
-                Context.isFileUploaded
+                Context.isFileUploaded && !previewProgress
                   ? styles["convert-btn"]
                   : `${styles["convert-btn"]} ${styles["convert-btn__disabled"]}`
               }
