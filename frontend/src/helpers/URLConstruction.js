@@ -1,9 +1,9 @@
-const baseServerURL = "http://localhost:8080";
+const baseServerURL = "http://localhost:8080/api";
 
-export const pdfConversionURL = `${baseServerURL}/api/convertTopdf`;
+export const pdfConversionURL = `${baseServerURL}/convertTopdf`;
 // export const pdfConversionURL = `api/convertTopdf`;
-export const epubConversionURL = `${baseServerURL}/api/convertToepub`;
+export const epubConversionURL = `${baseServerURL}/convertToepub`;
 
-export const pdfPreviewURL = `${baseServerURL}/api/pdfpreview`;
+export const pdfPreviewURL = `${baseServerURL}/pdfpreview`;
 // export const epubConversionURL = `api/convertToepub`;
-export const epubPreviewURL = `${baseServerURL}/api/epubpreview`;
+export const epubPreviewURL = `${baseServerURL}/epubpreview`;

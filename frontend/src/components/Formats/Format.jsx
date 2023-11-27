@@ -75,16 +75,53 @@ const Format = (props) => {
     await sendData(data, format);
   };
 
-  const handlePreviewGeneration = () => {
-    setPreviewProgress(true);
+  const handlePreviewGeneration = async () => {
     const data = new FormData();
     data.append("format", format);
     data.append("template", template);
     data.append("file", Context.file);
     console.log(data);
-    setTimeout(() => {
+    const targetURL = format == "PDF" ? pdfPreviewURL : epubPreviewURL;
+    try {
+      setPreviewProgress(true);
+      const response = await fetch(targetURL, {
+        method: "POST",
+        body: data,
+      });
+
+      const contentType = response.headers.get("Content-Type");
+
+      if (contentType && contentType.includes("application/json")) {
+        const data = await response.json();
+        console.log(data);
+      } else {
+        // File attachment response
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        if (format === "EPUB") {
+          a.download = "convertedFile.epub";
+        } else {
+          a.download = "generated.pdf";
+        }
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        setPreviewProgress(false);
+        Context.isFileUploaded = false;
+        Context.file = null;
+        document.body.removeChild(a);
+        Context.uploadFile(null, false);
+        Context.changeNotificationStatus("success", "Successful conversion");
+      }
+    } catch (error) {
+      Context.changeNotificationStatus(
+        "error",
+        "Something went wrong fetching the preview file"
+      );
       setPreviewProgress(false);
-    }, 5000);
+    }
   };
 
   return (
