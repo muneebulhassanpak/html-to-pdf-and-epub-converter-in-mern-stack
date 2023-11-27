@@ -9,6 +9,7 @@ import {
   pdfPreviewURL,
 } from "../../helpers/URLConstruction";
 import { supportedFromats, supportedDesigns } from "../../helpers/utils";
+import Modal from "../Modal/Modal";
 
 const Format = (props) => {
   const Context = useContext(AppContext);
@@ -80,8 +81,9 @@ const Format = (props) => {
     data.append("format", format);
     data.append("template", template);
     data.append("file", Context.file);
-    console.log(data);
-    const targetURL = format == "PDF" ? pdfPreviewURL : epubPreviewURL;
+
+    const targetURL = format === "PDF" ? pdfPreviewURL : epubPreviewURL;
+
     try {
       setPreviewProgress(true);
       const response = await fetch(targetURL, {
@@ -94,25 +96,21 @@ const Format = (props) => {
       if (contentType && contentType.includes("application/json")) {
         const data = await response.json();
         console.log(data);
+        // Handle JSON response if needed
       } else {
         // File attachment response
         const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        // if (format === "EPUB") {
-        //   a.download = "preview.epub";
-        // } else {
-        //   a.download = "generated.pdf";
-        // }
-        a.download = "preview.html";
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
+        const htmlContent = await blob.text();
+
+        // Render HTML content in the Modal component
+        ReactDOM.createPortal(
+          <Modal htmlContent={htmlContent} />,
+          document.getElementById("modal-root")
+        );
+
         setPreviewProgress(false);
         Context.isFileUploaded = false;
         Context.file = null;
-        document.body.removeChild(a);
         Context.uploadFile(null, false);
         Context.changeNotificationStatus("success", "Successful conversion");
       }
@@ -124,7 +122,6 @@ const Format = (props) => {
       setPreviewProgress(false);
     }
   };
-
   return (
     <div className={styles["format-wrapper"]}>
       <div className={`${props.className} ${styles["format-div"]}`}>
