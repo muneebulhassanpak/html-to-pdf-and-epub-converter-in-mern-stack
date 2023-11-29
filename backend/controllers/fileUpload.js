@@ -186,8 +186,55 @@ exports.pdfPreviewController = async (req, res, next) => {
 };
 
 exports.epubPreviewController = async (req, res, next) => {
-  return res.json({
-    success: true,
-    message: "epub preview created",
-  });
+  try {
+    const { originalname } = req.file;
+    const fileExtension = originalname.split(".")[1];
+    const newFileName = req.file.path + "." + fileExtension;
+    fs.renameSync(req.file.path, newFileName);
+
+    // Load the uploaded HTML file for conversion
+    const html = fs.readFileSync(newFileName, "utf-8");
+
+    // Extract all headings (h1 to h6) and generate an index
+    const { modifiedHtml } = generateIndexHtml(html);
+
+    // Modify the HTML to change the font family and styles based on the template value
+    const finalHtml = customizeHtmlStyles(modifiedHtml, req.body.template);
+
+    const template = req.body.template || "Classic";
+    const previewEpubOptions = {
+      title: "Preview EPUB Book",
+      author: "Author Name",
+      output: `${originalname}_preview.epub`,
+      content: [
+        {
+          title: "Chapter 1",
+          data: finalHtml,
+        },
+      ],
+    };
+
+    new epubGen(previewEpubOptions, (err) => {
+      if (err) {
+        return next(err);
+      }
+
+      // Read the preview EPUB file
+      const previewEpubFile = fs.readFileSync(`${originalname}_preview.epub`);
+
+      // Send the EPUB file as a response
+      res.setHeader("Content-Type", "application/epub+zip");
+      res.setHeader(
+        "Content-Disposition",
+        `inline; filename=${originalname}_preview.epub`
+      );
+      res.send(previewEpubFile);
+
+      // Delete the generated EPUB preview file and the original HTML file if needed
+      fs.unlinkSync(`${originalname}_preview.epub`);
+      fs.unlinkSync(newFileName);
+    });
+  } catch (err) {
+    return next(err);
+  }
 };
