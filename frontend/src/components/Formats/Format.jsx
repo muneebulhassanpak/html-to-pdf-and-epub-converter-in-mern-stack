@@ -93,6 +93,7 @@ const Format = (props) => {
     // Get the first page of the EPUB
     const firstPage = await reader.display();
     setPreviewUrl(firstPage.url);
+    console.log("EPUB was rendered");
 
     // Optionally, add event listeners or customize rendering
     // For example, you can listen for page changes or customize styles
@@ -121,6 +122,7 @@ const Format = (props) => {
       } else if (contentType && contentType.includes("application/epub+zip")) {
         // EPUB file attachment response
         const blob = await response.blob();
+        console.log(blob);
 
         // Load the EPUB file using epub.js
         const reader = ePub(blob);

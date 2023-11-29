@@ -1,5 +1,6 @@
 const fs = require("fs");
 const pdf = require("html-pdf");
+const epubGen = require("epub-gen");
 const {
   customizeHtmlStyles,
   generateIndexHtml,
@@ -214,26 +215,29 @@ exports.epubPreviewController = async (req, res, next) => {
       ],
     };
 
-    new epubGen(previewEpubOptions, (err) => {
-      if (err) {
+    // Generate the EPUB file
+    new epubGen(previewEpubOptions).promise
+      .then(() => {
+        // Read the preview EPUB file
+        const previewEpubFile = fs.readFileSync(`${originalname}_preview.epub`);
+
+        // Send the EPUB file as a response
+        res.setHeader("Content-Type", "application/epub+zip");
+        res.setHeader(
+          "Content-Disposition",
+          `inline; filename=${originalname}_preview.epub`
+        );
+        res.send(previewEpubFile);
+        console.log("Response was sent");
+
+        // Delete the generated EPUB preview file and the original HTML file if needed
+        fs.unlinkSync(`${originalname}_preview.epub`);
+        fs.unlinkSync(newFileName);
+      })
+      .catch((err) => {
+        console.error("Error generating EPUB:", err);
         return next(err);
-      }
-
-      // Read the preview EPUB file
-      const previewEpubFile = fs.readFileSync(`${originalname}_preview.epub`);
-
-      // Send the EPUB file as a response
-      res.setHeader("Content-Type", "application/epub+zip");
-      res.setHeader(
-        "Content-Disposition",
-        `inline; filename=${originalname}_preview.epub`
-      );
-      res.send(previewEpubFile);
-
-      // Delete the generated EPUB preview file and the original HTML file if needed
-      fs.unlinkSync(`${originalname}_preview.epub`);
-      fs.unlinkSync(newFileName);
-    });
+      });
   } catch (err) {
     return next(err);
   }
