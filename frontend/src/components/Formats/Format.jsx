@@ -18,10 +18,13 @@ const Format = (props) => {
   const [previewProgress, setPreviewProgress] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
 
-  // Reference to the EPUB reader instance
+  // Reference to the EPUB viewer
+  const epubViewerRef = useRef(null);
+
+  // EPUB reader instance
   const epubRef = useRef(null);
 
-  // Cleanup function to unload EPUB when the component is unmounted
+  // Cleanup function to destroy EPUB when component unmounts
   useEffect(() => {
     return () => {
       if (epubRef.current) {
@@ -52,40 +55,18 @@ const Format = (props) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        if (format === "EPUB") {
-          a.download = "convertedFile.epub";
-        } else {
-          a.download = "generated.pdf";
-        }
+        a.download = format === "EPUB" ? "convertedFile.epub" : "generated.pdf";
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
         setConverting(false);
-        Context.isFileUploaded = false;
-        Context.file = null;
+        resetContextState();
         document.body.removeChild(a);
-        Context.uploadFile(null, false);
         Context.changeNotificationStatus("success", "Successful conversion");
       }
     } catch (error) {
-      Context.changeNotificationStatus(
-        "error",
-        "Something went wrong converting file"
-      );
-      setConverting(false);
+      handleConversionError();
     }
-  };
-
-  const dataCollector = async () => {
-    if (!Context.file && template == "None") {
-      Context.changeErrorStatus("Please upload File");
-      return;
-    }
-    const data = new FormData();
-    data.append("format", format);
-    data.append("template", template);
-    data.append("file", Context.file);
-    await sendData(data, format);
   };
 
   // EPUB rendering function
@@ -94,12 +75,8 @@ const Format = (props) => {
     const firstPage = await reader.display();
     setPreviewUrl(firstPage.url);
     console.log("EPUB was rendered");
-
-    // Optionally, add event listeners or customize rendering
-    // For example, you can listen for page changes or customize styles
   };
 
-  // Function to handle EPUB preview generation
   const handleEpubPreviewGeneration = async () => {
     const data = new FormData();
     data.append("format", format);
@@ -122,14 +99,18 @@ const Format = (props) => {
       } else if (contentType && contentType.includes("application/epub+zip")) {
         // EPUB file attachment response
         const blob = await response.blob();
-        console.log(blob);
 
         // Load the EPUB file using epub.js
-        const reader = ePub(blob);
-        epubRef.current = reader;
+        const book = ePub(blob);
+        const rendition = book.renderTo(epubViewerRef.current, {
+          width: 600,
+          height: 400,
+        });
+        const displayed = await rendition.display();
+        epubRef.current = rendition;
 
         // Display the EPUB file in the viewer
-        renderEpub(reader);
+        renderEpub(rendition);
 
         setPreviewProgress(false);
         Context.changeNotificationStatus("success", "Successful conversion");
@@ -137,12 +118,20 @@ const Format = (props) => {
         // Handle other content types if needed
       }
     } catch (error) {
-      Context.changeNotificationStatus(
-        "error",
-        "Something went wrong fetching the preview file"
-      );
-      setPreviewProgress(false);
+      handleConversionError();
     }
+  };
+
+  const dataCollector = async () => {
+    if (!Context.file && template == "None") {
+      Context.changeErrorStatus("Please upload File");
+      return;
+    }
+    const data = new FormData();
+    data.append("format", format);
+    data.append("template", template);
+    data.append("file", Context.file);
+    await sendData(data, format);
   };
 
   // Function to handle PDF preview generation
@@ -175,11 +164,7 @@ const Format = (props) => {
         Context.changeNotificationStatus("success", "Successful conversion");
       }
     } catch (error) {
-      Context.changeNotificationStatus(
-        "error",
-        "Something went wrong fetching the preview file"
-      );
-      setPreviewProgress(false);
+      handleConversionError();
     }
   };
 
@@ -190,6 +175,22 @@ const Format = (props) => {
     } else if (format === "PDF") {
       handlePdfPreviewGeneration();
     }
+  };
+
+  // Helper function to reset context state
+  const resetContextState = () => {
+    Context.isFileUploaded = false;
+    Context.file = null;
+    Context.uploadFile(null, false);
+  };
+
+  // Helper function to handle conversion errors
+  const handleConversionError = () => {
+    Context.changeNotificationStatus(
+      "error",
+      "Something went wrong converting file"
+    );
+    setConverting(false);
   };
 
   return (
@@ -288,6 +289,12 @@ const Format = (props) => {
           )}
         </div>
       </div>
+      {format === "EPUB" && (
+        <div>
+          <h3>EPUB Preview</h3>
+          <div ref={epubViewerRef} />
+        </div>
+      )}
     </>
   );
 };
