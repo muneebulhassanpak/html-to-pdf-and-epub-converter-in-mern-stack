@@ -1,5 +1,4 @@
-import React, { useContext, useState } from "react";
-
+import React, { useContext, useState, useRef, useEffect } from "react";
 import styles from "./Format.module.css";
 import AppContext from "../../store/app-context";
 import {
@@ -9,6 +8,7 @@ import {
   pdfPreviewURL,
 } from "../../helpers/URLConstruction";
 import { supportedFromats, supportedDesigns } from "../../helpers/utils";
+import ePub from "epubjs";
 
 const Format = (props) => {
   const Context = useContext(AppContext);
@@ -18,7 +18,19 @@ const Format = (props) => {
   const [previewProgress, setPreviewProgress] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
 
-  //Data sender
+  // Reference to the EPUB reader instance
+  const epubRef = useRef(null);
+
+  // Cleanup function to unload EPUB when the component is unmounted
+  useEffect(() => {
+    return () => {
+      if (epubRef.current) {
+        epubRef.current.destroy();
+      }
+    };
+  }, []);
+
+  // Data sender function
   const sendData = async (submittedData, format) => {
     let targetURL = format === "PDF" ? pdfConversionURL : epubConversionURL;
     try {
@@ -76,17 +88,71 @@ const Format = (props) => {
     await sendData(data, format);
   };
 
-  const handlePreviewGeneration = async () => {
+  // EPUB rendering function
+  const renderEpub = async (reader) => {
+    // Get the first page of the EPUB
+    const firstPage = await reader.display();
+    setPreviewUrl(firstPage.url);
+
+    // Optionally, add event listeners or customize rendering
+    // For example, you can listen for page changes or customize styles
+  };
+
+  // Function to handle EPUB preview generation
+  const handleEpubPreviewGeneration = async () => {
     const data = new FormData();
     data.append("format", format);
     data.append("template", template);
     data.append("file", Context.file);
 
-    const targetURL = format === "PDF" ? pdfPreviewURL : epubPreviewURL;
+    try {
+      setPreviewProgress(true);
+      const response = await fetch(epubPreviewURL, {
+        method: "POST",
+        body: data,
+      });
+
+      const contentType = response.headers.get("Content-Type");
+
+      if (contentType && contentType.includes("application/json")) {
+        const data = await response.json();
+        console.log(data);
+        // Handle JSON response if needed
+      } else if (contentType && contentType.includes("application/epub+zip")) {
+        // EPUB file attachment response
+        const blob = await response.blob();
+
+        // Load the EPUB file using epub.js
+        const reader = ePub(blob);
+        epubRef.current = reader;
+
+        // Display the EPUB file in the viewer
+        renderEpub(reader);
+
+        setPreviewProgress(false);
+        Context.changeNotificationStatus("success", "Successful conversion");
+      } else {
+        // Handle other content types if needed
+      }
+    } catch (error) {
+      Context.changeNotificationStatus(
+        "error",
+        "Something went wrong fetching the preview file"
+      );
+      setPreviewProgress(false);
+    }
+  };
+
+  // Function to handle PDF preview generation
+  const handlePdfPreviewGeneration = async () => {
+    const data = new FormData();
+    data.append("format", format);
+    data.append("template", template);
+    data.append("file", Context.file);
 
     try {
       setPreviewProgress(true);
-      const response = await fetch(targetURL, {
+      const response = await fetch(pdfPreviewURL, {
         method: "POST",
         body: data,
       });
@@ -114,6 +180,16 @@ const Format = (props) => {
       setPreviewProgress(false);
     }
   };
+
+  // Function to handle preview generation based on the selected format
+  const handlePreviewGeneration = () => {
+    if (format === "EPUB") {
+      handleEpubPreviewGeneration();
+    } else if (format === "PDF") {
+      handlePdfPreviewGeneration();
+    }
+  };
+
   return (
     <>
       <div className={styles["format-wrapper"]}>
